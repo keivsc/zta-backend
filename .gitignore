@@ -1,0 +1,8 @@
+.env
+/node_modules
+
+# ignore everything inside database
+/database/*
+
+# but keep the folder itself
+!/database/
