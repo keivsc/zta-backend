@@ -57,6 +57,8 @@ export function fileToBlob(content) {
   return blob;
 }
 
+const DEBUG_USER = 'admin';
+const DEBUG_PASS = process.env.DEBUG_PASS;
 
 export function requireDebugAuth(req, res, next) {
   // --- Basic Auth check ---
