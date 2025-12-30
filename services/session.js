@@ -234,8 +234,6 @@ export async function evaluateSession({ userId, deviceId, currentIp }) {
     return { action: "ALLOW", userId, deviceId, currentIp };
 
   } catch (err) {
-    // On any error, deny access
-    console.log(err);
     await sesDb.run(`DELETE FROM sessions WHERE userId = ? AND deviceId = ?`, [userId, deviceId]);
     return { action: "DENY", userId, deviceId, currentIp };
   }

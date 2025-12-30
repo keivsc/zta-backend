@@ -263,9 +263,6 @@ export async function verifyChallengeAndIssueToken({
 
     const sessionToken = await evaluateSession({ userId, deviceId, ip });
 
-    console.log(sessionToken)
-    console.log(TOTPCheck)
-
     if (sessionToken.action !== 'ALLOW' || TOTPCheck) {
         const totpPrompt = await promptTotp(deviceId, userId);
 
@@ -352,25 +349,19 @@ export async function promptTotp(deviceId, userId) {
   const now = Date.now();
 
   const existing = await userDb.get(
-    `SELECT expiresAt FROM totp WHERE deviceId = ? AND userId = ?`,
-    [deviceId, userId]
+    `SELECT expiresAt FROM totp WHERE deviceId = ?`,
+    [deviceId]
   );
 
   // Remove expired entry
   if (existing && existing.expiresAt < now) {
     await userDb.run(
-      `DELETE FROM totp WHERE deviceId = ? AND userId = ?`,
-      [deviceId, userId]
+      `DELETE FROM totp WHERE deviceId = ?`,
+      [deviceId]
     );
   }
 
-  // Create new TOTP challenge if none exists
-  const challenge = await userDb.get(
-    `SELECT expiresAt FROM totp WHERE deviceId = ? AND userId = ?`,
-    [deviceId, userId]
-  );
-
-  if (!challenge) {
+  if (!existing) {
     const expiresAt = now + 5 * 60 * 1000; // 5 minutes
     await userDb.run(
       `INSERT INTO totp (deviceId, userId, expiresAt) VALUES (?, ?, ?)`,
@@ -379,7 +370,7 @@ export async function promptTotp(deviceId, userId) {
     return { required: true, expiresAt };
   }
 
-  return { required: true, expiresAt: challenge.expiresAt };
+  return { required: true, expiresAt: existing.expiresAt };
 }
 
 
